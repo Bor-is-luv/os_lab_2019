@@ -1,0 +1,2 @@
+grep 'cake' cake_rhymes.txt > with_cake.txt
+rm test > /dev/null
