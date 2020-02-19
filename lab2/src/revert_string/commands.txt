@@ -1,0 +1,42 @@
+STATIC
+gcc -c main.c
+gcc -c revert_string.c -o static/revert_string.o
+cd static/
+ar rcs libreverse revert_string.o 
+gcc ../main.o -L -l libreverse -o static_linked
+./static_linked bca
+Reverted: acb
+
+DYNAMIC
+gcc -c -fPIC revert_string.c -o dynamic/revert_string.o
+gcc -shared revert_string.o -o libreverse.so
+gcc ../main.o -L. -lreverse -o reverse
+./reverse
+
+./reverse: error while loading shared libraries: libreverse.so: cannot open shared object file: No such file or directory
+
+sudo mv ~/Рабочий\ стол/os_ipovs/os_lab_2019/lab2/src/revert_string/dynamic/libreverse.so /usr/lib
+sudo chmod 755 /usr/lib/libreverse.so
+./reverse lkjhgfd
+Reverted: dfghjkl
+
+TESTS
+gcc -c tests.c -o test.o
+gcc test.o -lreverse -lcunit -o tests
+./tests
+
+
+     CUnit - A unit testing framework for C - Version 2.1-3
+     http://cunit.sourceforge.net/
+
+
+Suite: Suite
+  Test: test of RevertString function ...passed
+
+Run Summary:    Type  Total    Ran Passed Failed Inactive
+              suites      1      1    n/a      0        0
+               tests      1      1      1      0        0
+             asserts      4      4      4      0      n/a
+
+Elapsed time =    0.000 seconds
+
