@@ -1,10 +1,9 @@
 #!/bin/bash
-MAXCOUNT=150
-count=1
+MAXCOUNT=149
+count=0
 while [ "$count" -le $MAXCOUNT ]
 do
-  number=$RANDOM
-  echo $number >> numbers.txt
-  let "count += 1"
+ od -A n -t d -N 1 /dev/urandom >> numbers.txt
+ let "count += 1"
 done
-
+echo $count
