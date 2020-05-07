@@ -15,7 +15,7 @@ gcc ../main.o -L. -lreverse -o reverse
 
 ./reverse: error while loading shared libraries: libreverse.so: cannot open shared object file: No such file or directory
 
-sudo mv ~/Рабочий\ стол/os_ipovs/os_lab_2019/lab2/src/revert_string/dynamic/libreverse.so /usr/lib
+sudo mv ~/labs/6sem/os_lab_2019/lab2/src/revert_string/dynamic/libreverse.so /usr/lib
 sudo chmod 755 /usr/lib/libreverse.so
 ./reverse lkjhgfd
 Reverted: dfghjkl
