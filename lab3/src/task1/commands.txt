@@ -1,0 +1,1 @@
+gcc sequential_min_max.c find_min_max.c  utils.c -o prog
