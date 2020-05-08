@@ -12,8 +12,8 @@
 
 #include <getopt.h>
 
-#include "find_min_max.c"
-#include "utils.c"
+#include "find_min_max.h"
+#include "utils.h"
 
 int main(int argc, char **argv) {
   int seed = -1;
@@ -92,10 +92,6 @@ int main(int argc, char **argv) {
 
   int *array = malloc(sizeof(int) * array_size);
   GenerateArray(array, array_size, seed);
-  
-  for (int i = 0; i < array_size; i++) {
-    printf("%d %d\n", array[i], i);
-  }
   int active_child_processes = 0;
   
   int part = array_size/pnum;
@@ -138,6 +134,7 @@ int main(int argc, char **argv) {
     wait(NULL);
     active_child_processes -= 1;
   }
+  double average_time;
   struct MinMax min_max;
   min_max.min = INT_MAX;
   min_max.max = INT_MIN;
@@ -164,13 +161,13 @@ int main(int argc, char **argv) {
   gettimeofday(&finish_time, NULL);
 
   double elapsed_time = (finish_time.tv_sec - start_time.tv_sec) * 1000.0;
-  elapsed_time += (finish_time.tv_usec - start_time.tv_usec) / 1000.0;
+  average_time += (finish_time.tv_usec - start_time.tv_usec) / 1000.0;
 
   free(array);
 
   printf("Min: %d\n", min_max.min);
   printf("Max: %d\n", min_max.max);
-  printf("Elapsed_time: %fms\n", elapsed_time);
+  printf("AverageTime: %fms\n", average_time);
   fflush(NULL);
   return 0;
 }

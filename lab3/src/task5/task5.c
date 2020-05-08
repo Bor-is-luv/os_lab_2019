@@ -3,6 +3,6 @@
 
 int main(void)
 {
-    execl("sequential_min_max"," ","10","100",NULL);
+    execl("sequential_min_max"," ","3","12",NULL);
     return 0;
 }
