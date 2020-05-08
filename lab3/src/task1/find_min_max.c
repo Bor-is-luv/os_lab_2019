@@ -4,14 +4,16 @@
 
 struct MinMax GetMinMax(int *array, unsigned int begin, unsigned int end) {
   struct MinMax min_max;
-  min_max.min = INT_MAX;
-  min_max.max = INT_MIN;
+  min_max.min = array[begin+4];
+  min_max.max = array[begin+4];
 
-  for(int i = begin; i < end; i++)
-  {
-    if(array[i] < min_max.min) min_max.min = array[i];
-    if(array[i] > min_max.max) min_max.max = array[i];
+  unsigned int i;
+  for (i = begin + 1 +4; i < end+4; i++) {
+    if (array[i] < min_max.min)
+      min_max.min = array[i];
+    if (array[i] > min_max.max)
+      min_max.max = array[i];
   }
-
   return min_max;
+
 }

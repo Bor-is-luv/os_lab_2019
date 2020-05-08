@@ -14,6 +14,5 @@ for(int i = begin; i < end; i++)
     if(array[i] > min_max.max) min_max.max = array[i];
 }
 
-
   return min_max;
 }

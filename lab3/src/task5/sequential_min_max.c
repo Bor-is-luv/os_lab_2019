@@ -22,16 +22,10 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  int *array = (int*)malloc((array_size+4) * sizeof(int));
+  int *array = malloc(array_size * sizeof(int));
   GenerateArray(array, array_size, seed);
   struct MinMax min_max = GetMinMax(array, 0, array_size);
   free(array);
-
-  for (int i=0+4; i<array_size+4; i++)
-  {
-	  printf("%d ", array[i]);
-      printf("%d\n", i-4);
-  }
 
   printf("min: %d\n", min_max.min);
   printf("max: %d\n", min_max.max);
