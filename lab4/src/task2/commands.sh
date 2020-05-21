@@ -1,2 +1,2 @@
-gcc zombie.c -o task2
-./task2
+#gcc zombie.c -o task2
+./zombie
