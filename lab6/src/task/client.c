@@ -191,11 +191,6 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  if (servers_num > k / 2) {
-    servers_num = k / 2;
-    printf("Warning: too much servers. Continue with %d\n", servers_num);
-  }
-
   float block = (float)k / servers_num;
   fac_server_list_t* servers_list_item = servers_list;
   for (int i = 0; i < servers_num; i++) {

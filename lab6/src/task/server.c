@@ -102,8 +102,6 @@ int main(int argc, char **argv) {
   //присоединяет сокет к адресу
   int err = bind(server_fd, (struct sockaddr *)&server, sizeof(server));
   if (err < 0) {
-    if (errno == 13)
-      fprintf(stderr, "Try sudo %s\n", argv[0]);
     return 1;
   }
 
