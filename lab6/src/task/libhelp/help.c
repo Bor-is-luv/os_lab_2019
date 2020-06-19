@@ -2,9 +2,9 @@
 
 struct sockaddr_in create_sockaddr(uint16_t port, uint32_t s_addr) {
   struct sockaddr_in sockaddr = {
-    .sin_family = AF_INET, /* Always */
-    .sin_port = htons(port), /* Host to network short */
-    .sin_addr.s_addr = htonl(s_addr), /* Host to network long */
+    .sin_family = AF_INET,
+    .sin_port = htons(port), 
+    .sin_addr.s_addr = htonl(s_addr), 
     .sin_zero = {0}
   };
   return sockaddr;
