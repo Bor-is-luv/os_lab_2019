@@ -15,7 +15,7 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 
-#include "libnetfac/netfac.h"
+#include "libhelp/help.h"
 
 #define VERBOSE
 
@@ -31,7 +31,6 @@ struct client_context {
 
 static pthread_mutex_t context_mtx = PTHREAD_MUTEX_INITIALIZER;
 
-/* Per server task */
 static void server_recieve_task(fac_server_t* server) {
   int socket = server->socket;
   char response[sizeof(uint64_t)];
@@ -50,14 +49,10 @@ static void server_recieve_task(fac_server_t* server) {
   pthread_mutex_unlock(&context_mtx);
 }
 
-/* Join threads and free data */
 static void finalize_tasks() {
   fac_server_list_t* iter = servers_list;
   for (int i = 0; iter != NULL; ) {
     if (i < servers_num)
-      /* Some servers may be unused 
-       * but we have to free memory anyway
-       * */
       if (pthread_join(iter->server.thread, NULL) != 0) {
         printf("Error: cannot join %ld\n", iter->server.thread);
         exit(1);
@@ -72,7 +67,7 @@ static void finalize_tasks() {
   }
 }
 
-/* <X.X.X.X>:<PORT> */
+
 static fac_server_list_t* read_servers_file(const char* filename, int* len) {
   if (access(filename, F_OK) == -1) {
     printf("Error: file %s does not exist\n", filename);
@@ -93,13 +88,13 @@ static fac_server_list_t* read_servers_file(const char* filename, int* len) {
     int res = fscanf(file, "%s : %d", head->server.ip, &head->server.port);
     if (res != 2) {
       free(head);
-      if (res == EOF)  /* No more strings */
+      if (res == EOF) 
         break;
-      fclose(file);  /* Else error occured */
+      fclose(file); 
       return 0;
     }
 #ifdef VERBOSE
-    printf("Got server %s:%d\n", head->server.ip, head->server.port);
+    printf("Server %s %d\n", head->server.ip, head->server.port);
 #endif
     if (!first)
       first = head;
@@ -132,8 +127,6 @@ int main(int argc, char **argv) {
   uint64_t k = -1;
   uint64_t mod = -1;
   context.res = 1;
-  /* Domain name max length is 255 bytes */
-  /* Linux file name max length is 255 bytes */
   char servers_file[255] = {'\0'};
 
   while (true) {
@@ -193,7 +186,6 @@ int main(int argc, char **argv) {
   context.start_args.end = k+1;
   context.start_args.mod = mod;
 
-  /* Get servers list */
   if ((servers_list = read_servers_file(servers_file, &servers_num)) == 0) {
     printf("Error: cannot read servers file\n");
     return -1;
@@ -203,65 +195,49 @@ int main(int argc, char **argv) {
     servers_num = k / 2;
     printf("Warning: too much servers. Continue with %d\n", servers_num);
   }
-#ifdef VERBOSE
-  printf("Got server list, len=%d\n", servers_num);
-#endif
 
-  /* Send data and wait for results */
   float block = (float)k / servers_num;
   fac_server_list_t* servers_list_item = servers_list;
   for (int i = 0; i < servers_num; i++) {
 
     fac_server_t* server = &servers_list_item->server;
-    /* Prepare package */
     server->args.begin = round(block * (float)i) + 1;
     server->args.end = round(block * (i + 1.f)) + 1;
     server->args.mod = mod;
 
-    /* Prepare socket */
     struct sockaddr_in server_sockaddr = create_sockaddr(server->port, 0);
     if (!inet_aton(server->ip, &server_sockaddr.sin_addr)) {
       printf("Error: cannot translate %s into int value\n", server->ip);
       return -1;
     }
 
-    /* Socket for every server */
     int sck = socket(AF_INET, SOCK_STREAM, 0);
     if (sck < 0) {
       fprintf(stderr, "Socket creation failed!\n");
       exit(1);
     }
     server->socket = sck;
-#ifdef VERBOSE
-    printf("Socket [%s:%d] created\n", server->ip, server->port);
-#endif
+    printf("Socket %s:%d created\n", server->ip, server->port);
 
-    /* Connects socket sck to address server */
     if (connect(sck, (struct sockaddr *)&server_sockaddr, sizeof(struct sockaddr_in)) < 0) {
       fprintf(stderr, "Connection failed\n");
       exit(1);
     }
 
-    /* Send actual data */
     if (send(sck, &server->args, sizeof(fac_args_t), 0) < 0) {
       fprintf(stderr, "Send failed\n");
       exit(1);
     }
-#ifdef VERBOSE
-    printf("Data sent\n");
-#endif
 
-    /* Run task to recieve result */
     if (pthread_create(&server->thread, NULL, (void*)server_recieve_task, (void*)server) != 0) {
       printf("Error: cannot create thread to recieve from server [%s:%d]\n", server->ip, server->port);
       return -1;
     }
 
-    /* Iterate list */
     servers_list_item = servers_list_item->next; 
   }
 
   finalize_tasks();
-  printf("Result: %lu\n", context.res);  /* Threads done - no need in mutex */
+  printf("Result: %lu\n", context.res);
   return 0;
 }

@@ -13,7 +13,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include "libnetfac/netfac.h"
+#include "libhelp/help.h"
 
 static uint64_t Factorial(const fac_args_t* args) {
   uint64_t ans = args->begin;
@@ -82,10 +82,8 @@ int main(int argc, char **argv) {
   }
 
   int server_fd = socket(AF_INET, SOCK_STREAM, 0);  
-  /* AF_INET - IPv4, SOCK_STREAM - bidirectional, 0 - use 
-   *  AF_INET option to determine protocol
-   * byte streams, supports connections
-   *  */
+  //AF_INET - IPv4, 
+  //SOCK_STREAM - TCP
   if (server_fd < 0) {
     fprintf(stderr, "Can not create server socket!");
     return 1;
@@ -94,31 +92,22 @@ int main(int argc, char **argv) {
   struct sockaddr_in server = create_sockaddr(port, INADDR_ANY);
 
   int opt_val = 1;
-  /* Set socket flags:
-   * server_fd - socket descriptor
-   * SOL_SOCKET - socket level for flags
-   * SO_REUSEADDR - address supplied to bind() should 
-   *  allow reuse of local addresses, if suppored
-   * &opt_val - set logical flag
-   * sizeof flag
-   * */
+  //Setsocket:
+   //server_fd - дескриптор
+   //SOL_SOCKET - параметры на уровне библиотеки
+   //SO_REUSEADDR - Разрешает повторное использование локальных адресов 
+   
   setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof(opt_val));
 
-  /* Binds socket to local address (gives a name) */
+  //присоединяет сокет к адресу
   int err = bind(server_fd, (struct sockaddr *)&server, sizeof(server));
   if (err < 0) {
     if (errno == 13)
       fprintf(stderr, "Try sudo %s\n", argv[0]);
-    fprintf(stderr, "Can not bind to socket!, errno=%d\n", errno);
     return 1;
   }
 
-  /* Marks the socket server_fd as a passive that
-   *  will be used to accept incoming connections
-   * works only with SOCK_STREAM and SOCK_SEQPACKET
-   * 
-   * 128 - maximum connection queue length
-   * */
+  // 128 connections - max
   err = listen(server_fd, 128);
   if (err < 0) {
     fprintf(stderr, "Could not listen on socket\n");
@@ -130,14 +119,6 @@ int main(int argc, char **argv) {
   while (true) {
     struct sockaddr_in client;
     socklen_t client_len = sizeof(client);
-    /* accept() is used only with listen() call
-     * accept() extracts the first connection request from queue and 
-     *  creates a new socket and returns its descriptor
-     * original socket server_fd is unaffected by this call
-     *
-     * after accept() filled client struct, it will fill the exact client_len
-     * we are using a blocking socket, so accept() will wait for connections
-     * */
     int client_fd = accept(server_fd, (struct sockaddr *)&client, &client_len);
 
     if (client_fd < 0) {
@@ -145,21 +126,12 @@ int main(int argc, char **argv) {
       continue;
     }
 
-    /* After we got a fd for a client, we can read from it 
-     * For every client message calculate factorial 
-     *  then send it back
-     * */
     while (true) {
       size_t buffer_size = sizeof(fac_args_t);
       char from_client[buffer_size];
 
-      /* Recieves a message from a socket
-       * if flags are not set, read() call is the same
-       * if no messages are available in the socket, wait for a one (nonblocking)
-       * */
       int read = recv(client_fd, from_client, buffer_size, 0);
 
-      /* No data recieved */
       if (!read)
         break;
       if (read < 0) {
@@ -187,7 +159,6 @@ int main(int argc, char **argv) {
       }
       fac_args_t args[tnum];
 
-      /* Start threads (why?) */
       float block = (float)(end - begin) / tnum;
       for (uint32_t i = 0; i < tnum; i++) {
         args[i].begin = begin + round(block * (float)i);
@@ -201,24 +172,17 @@ int main(int argc, char **argv) {
         }
       }
 
-      /* Join threads */
       uint64_t total = 1;
       for (uint32_t i = 0; i < tnum; i++) {
         uint64_t result = 0;
         pthread_join(threads[i], (void **)&result);
-        /* We are using thread return value (why no shared data?) */
         total = MultModulo(total, result, mod);
       }
 
       printf("Total: %lu\n", total);
-
-      /* Send back result */
       char buffer[sizeof(total)];
       memcpy(buffer, &total, sizeof(total));
 
-      /* Send a message to socket
-       * send() can be used only if socket is Connected
-       * accept() creates a Connected socket */
       err = send(client_fd, buffer, sizeof(total), 0);
       if (err < 0) {
         fprintf(stderr, "Can't send data to client\n");
@@ -226,7 +190,6 @@ int main(int argc, char **argv) {
       }
     }
 
-    /* On both sides, receptions and transmissions are disallowed */
     shutdown(client_fd, SHUT_RDWR);
     close(client_fd);
   }
