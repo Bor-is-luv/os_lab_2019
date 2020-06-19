@@ -2,21 +2,21 @@ all: client server
 
 dbg: client-dbg server-dbg
 
-client-dbg: client.c libnetfac
-	gcc -o client-dbg.out client.c -I./libnetfac -L./ -lpthread -lm -lnetfac -g -O0
+client-dbg: client.c libhelp
+	gcc -o client-dbg.out client.c -I./libhelp -L./ -lpthread -lm -lhelp -g -O0
 
-server-dbg: server.c libnetfac
-	gcc -o server-dbg.out  server.c -I./libnetfac -L./ -lpthread -lm -lnetfac -g -O0
+server-dbg: server.c libhelp
+	gcc -o server-dbg.out  server.c -I./libhelp -L./ -lpthread -lm -lhelp -g -O0
 
-client: client.c libnetfac
-	gcc -o client.out client.c -I./libnetfac -L./ -lpthread -lm -lnetfac
+client: client.c libhelp
+	gcc -o client.out client.c -I./libhelp -L./ -lpthread -lm -lhelp
 
-server: server.c libnetfac
-	gcc -o server.out server.c -I./libnetfac -L./ -lpthread -lm -lnetfac
+server: server.c libhelp
+	gcc -o server.out server.c -I./libhelp -L./ -lpthread -lm -lhelp
 
-libnetfac: ./libnetfac/netfac.c
-	gcc -o ./libnetfac/libnetfac.o -c ./libnetfac/netfac.c -I./libnetfac
-	ar rcs ./libnetfac.a ./libnetfac/libnetfac.o
+libhelp: ./libhelp/help.c
+	gcc -o ./libhelp/libhelp.o -c ./libhelp/help.c -I./libhelp
+	ar rcs ./libhelp.a ./libhelp/libhelp.o
 
 clean:
 	rm -r *.o *.a *.out -f
