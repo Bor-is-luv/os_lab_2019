@@ -57,9 +57,7 @@ static void finalize_tasks() {
         printf("Error: cannot join %ld\n", iter->server.thread);
         exit(1);
       }
-#ifdef VERBOSE
-    printf("Thread %ld joined\n", iter->server.thread);
-#endif
+
     fac_server_list_t* prev = iter;
     iter = iter->next;
     free(prev);
